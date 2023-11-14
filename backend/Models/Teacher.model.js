@@ -20,11 +20,6 @@ const TeacherSchema = mongoose.Schema({
   },
   subjectExpert: {
     type: String,
-    enum: ["male", "female", "other"]
-  },
-  language: {
-    type: String,
-    required: true
   },
   experience: {
     type: String,
