@@ -10,15 +10,19 @@ import {
   useColorModeValue,
   Switch,
   Select,
+  Text,
 } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FetchWrapper } from "../../utils/fetchWrapper";
+import { useNavigate } from "react-router-dom";
 export const Signup = () => {
   const [signupData, setSignupData] = useState({});
   const [click, setClick] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
-  const API = new FetchWrapper()
+  const navigate = useNavigate();
+  const API = new FetchWrapper(process.env.REACT_APP_API_URL);
 
   const handleClick = (event) => {
     setClick(event.target.checked);
@@ -32,28 +36,31 @@ export const Signup = () => {
     setSignupData({ ...signupData, [name]: value, role });
   };
 
-  const fetchRequest = async() =>{
-
-  }
-  const handleSubmit = () => {
-    if ("role" in signupData) {
-      // toast({
-      //   title: "Please provide all details",
-      //   description: "Some details are missing.",
-      //   status: "success",
-      //   duration: 9000,
-      //   isClosable: true,
-      // });
-      fetchRequest()
-    } else {
-      toast({
-        title: "Please provide all details",
-        description: "Some details are missing.",
-        status: "info",
-        duration: 9000,
-        isClosable: true,
-      });
+  const fetchRequest = async () => {
+    try {
+      const responece = await API.post(
+        click ? "teacher/register" : "student/register",
+        signupData
+      );
+      const data = await responece.json();
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+      if (err) {
+        toast({
+          title: "Opps an erro occured",
+          description: `${err}`,
+          status: "info",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
+  };
+  const handleSubmit = () => {
+    fetchRequest();
   };
 
   console.log(signupData);
@@ -67,7 +74,8 @@ export const Signup = () => {
           rounded={"lg"}
           bg={useColorModeValue("white", "gray.700")}
           boxShadow={"lg"}
-          p={4}aa
+          p={4}
+          aa
         >
           <Stack spacing={4}>
             <FormControl display="flex" alignItems="center">
@@ -105,7 +113,7 @@ export const Signup = () => {
                   <FormLabel>Subject Experties</FormLabel>
                   <Select
                     placeholder="Select Subject"
-                    name="Subject Experties"
+                    name="subjectExpert"
                     onChange={handleChange}
                   >
                     <option value="Physics">Physics</option>
@@ -163,6 +171,7 @@ export const Signup = () => {
                       bg: "blue.500",
                     }}
                     onClick={handleSubmit}
+                    isDisabled = {isLoading}
                   >
                     Sign Up
                   </Button>
@@ -242,12 +251,23 @@ export const Signup = () => {
                       bg: "blue.500",
                     }}
                     onClick={handleSubmit}
+                    isDisabled = {isLoading}
                   >
                     Sign Up
                   </Button>
                 </Stack>
               </form>
             )}
+              <Stack
+                direction={{ base: "column", sm: "row" }}
+                align={"start"}
+                justify={"flex-start"}
+              >
+                <Text>Aleady have an account?</Text>
+                <Text color={"blue.400"} onClick={() => navigate("/")}>
+                  Click Here
+                </Text>
+              </Stack>
           </Stack>
         </Box>
       </Stack>

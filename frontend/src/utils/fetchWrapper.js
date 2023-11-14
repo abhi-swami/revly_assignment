@@ -6,16 +6,16 @@ export class FetchWrapper{
         return this.#methodRequest("GET", endpoint);
     };
 
-    post (endpoint) {
-        return this.#methodRequest("POST", endpoint);
+    post (endpoint,userBody) {
+        return this.#methodRequest("POST", endpoint, userBody);
     }
 
-    put (endpoint) {
-        return this.#methodRequest("PUT", endpoint);
+    put (endpoint,userBody) {
+        return this.#methodRequest("PUT", endpoint, userBody);
     }
 
-    delete (endpoint) {
-        return this.#methodRequest("DELETE", endpoint);
+    delete (endpoint,userBody) {
+        return this.#methodRequest("DELETE", endpoint, userBody);
     }
 
     #methodRequest (method,endpoint,userBody = {}) {

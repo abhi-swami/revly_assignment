@@ -10,25 +10,72 @@ import {
   useColorModeValue,
   Switch,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FetchWrapper } from "../../utils/fetchWrapper";
 
 export const Login = () => {
   const [loginData, setLoginData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const API = new FetchWrapper(process.env.REACT_APP_API_URL);
+
+  const [click, setClick] = useState(false);
+
+  const navigate = useNavigate();
+
+  const toast = useToast();
+
   const handleChange = (event) => {
     const name = event.target.name;
-    const value =
-      name === "role"
-        ? event.target.checked
-          ? "teacher"
-          : "student"
-        : event.target.value;
+    const value = event.target.value;
     setLoginData({ ...loginData, [name]: value });
-    console.log(name, value);
   };
   console.log(loginData);
-  const navigate = useNavigate();
+
+  const handleClick = (event) => {
+    setClick(event.target.checked);
+  };
+
+  const fetchRequest = async () => {
+    setIsLoading(true);
+    try {
+      const responece = await API.post(
+        click ? "teacher/login" : "student/login",
+        loginData
+      );
+      const data = await responece.json();
+      console.log(data);
+      if (data.message === "Login successfull!") {
+        toast({
+          title: "Login Successfull",
+          description: ``,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      if (err) {
+        toast({
+          title: "Opps an error occured",
+          description: `${err}`,
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    fetchRequest();
+  };
   return (
     <Flex
       minH={"100vh"}
@@ -68,10 +115,10 @@ export const Login = () => {
                 />
               </FormControl>
               <FormControl display="flex" alignItems="center">
-                <FormLabel htmlFor="email-alerts" mb="0">
+                <FormLabel htmlFor="email-alerts" mt="2">
                   Are You a Tutor ?
                 </FormLabel>
-                <Switch id="email-alerts" onChange={handleChange} name="role" />
+                <Switch id="email-alerts" onChange={handleClick} name="role" />
               </FormControl>
               <Stack spacing={5}>
                 <Button
@@ -80,6 +127,8 @@ export const Login = () => {
                   _hover={{
                     bg: "blue.500",
                   }}
+                  onClick={handleSubmit}
+                  isDisabled={isLoading}
                 >
                   Sign in
                 </Button>
@@ -89,10 +138,10 @@ export const Login = () => {
                 align={"start"}
                 justify={"flex-start"}
               >
-                <Text >
-                  Don't have an account?
+                <Text>Don't have an account?</Text>
+                <Text color={"blue.400"} onClick={() => navigate("/signup")}>
+                  Click Here
                 </Text>
-                <Text color={"blue.400"} onClick={() => navigate("/signup")}>Click Here</Text>
               </Stack>
             </form>
           </Stack>
